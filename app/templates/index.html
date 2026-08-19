@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DataIntelligence — AI-Powered Excel Platform</title>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Feather Icons -->
+  <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i data-feather="zap"></i></div>
+      <span class="logo-text">DataIntelligence</span>
+    </div>
+    <button class="sidebar-toggle" id="sidebarToggle"><i data-feather="menu"></i></button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" data-page="dashboard">
+      <i data-feather="layout"></i><span>Dashboard</span>
+    </a>
+    <a href="#" class="nav-item" data-page="data">
+      <i data-feather="table"></i><span>Excel Data</span>
+    </a>
+    <a href="#" class="nav-item" data-page="agent">
+      <i data-feather="cpu"></i><span>AI Agent</span>
+    </a>
+    <a href="#" class="nav-item" data-page="insights">
+      <i data-feather="trending-up"></i><span>AI Insights</span>
+    </a>
+    <a href="#" class="nav-item" data-page="reports">
+      <i data-feather="file-text"></i><span>Reports</span>
+    </a>
+    <a href="#" class="nav-item" data-page="history">
+      <i data-feather="clock"></i><span>History</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="dataset-badge" id="sidebarDatasetBadge" style="display:none">
+      <i data-feather="database"></i>
+      <div class="dataset-badge-info">
+        <span class="dataset-badge-name" id="sidebarDatasetName">—</span>
+        <span class="dataset-badge-version" id="sidebarVersionLabel">—</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════════════════════════════ MAIN -->
+<main class="main-content" id="mainContent">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1 class="page-title" id="pageTitle">Dashboard</h1>
+      <div class="breadcrumb" id="breadcrumb"></div>
+    </div>
+    <div class="topbar-right">
+      <div class="version-selector-wrap" id="versionSelectorWrap" style="display:none">
+        <label>Version:</label>
+        <select id="versionSelector" class="version-select"></select>
+      </div>
+      <button class="btn btn-primary" id="uploadNewBtn">
+        <i data-feather="upload-cloud"></i> Upload Excel
+      </button>
+    </div>
+  </header>
+
+  <!-- NOTIFICATION BAR -->
+  <div class="notification-bar" id="notificationBar" style="display:none">
+    <i data-feather="info"></i>
+    <span id="notificationText"></span>
+    <button onclick="document.getElementById('notificationBar').style.display='none'">
+      <i data-feather="x"></i>
+    </button>
+  </div>
+
+  <!-- ─── PAGE: UPLOAD (shown when no dataset) ─── -->
+  <section class="page active" id="page-upload">
+    <div class="upload-hero">
+      <div class="upload-card" id="uploadCard">
+        <div class="upload-icon"><i data-feather="upload-cloud"></i></div>
+        <h2>Upload Your Excel File</h2>
+        <p>Drop your .xlsx or .xls file here, or click to browse.<br>
+           The AI will automatically detect, analyse, and clean your data.</p>
+        <div class="upload-dropzone" id="dropzone">
+          <input type="file" id="fileInput" accept=".xlsx,.xls" hidden />
+          <div class="dropzone-content" id="dropzoneContent">
+            <i data-feather="file-spreadsheet" class="drop-icon"></i>
+            <p>Drag & drop your Excel file here</p>
+            <span>or</span>
+            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+              Browse Files
+            </button>
+            <p class="upload-hint">Supported: .xlsx, .xls · Max 50 MB</p>
+          </div>
+          <div class="upload-progress" id="uploadProgress" style="display:none">
+            <div class="progress-spinner"></div>
+            <p id="uploadStatusText">Uploading and analysing…</p>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar" id="progressBar" style="width:0%"></div>
+            </div>
+            <div class="progress-steps" id="progressSteps"></div>
+          </div>
+        </div>
+        <div class="upload-features">
+          <div class="feature-chip"><i data-feather="search"></i> Auto-detect</div>
+          <div class="feature-chip"><i data-feather="shield"></i> Safe cleaning</div>
+          <div class="feature-chip"><i data-feather="cpu"></i> AI insights</div>
+          <div class="feature-chip"><i data-feather="download"></i> Download ready</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PAGE: DASHBOARD ─── -->
+  <section class="page" id="page-dashboard">
+    <!-- Upload summary banner -->
+    <div class="cleaning-banner" id="cleaningBanner" style="display:none">
+      <div class="cleaning-banner-content" id="cleaningBannerContent"></div>
+      <button class="btn btn-sm btn-ghost" onclick="document.getElementById('cleaningBanner').style.display='none'">
+        Dismiss
+      </button>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="kpi-skeleton"></div><div class="kpi-skeleton"></div>
+      <div class="kpi-skeleton"></div><div class="kpi-skeleton"></div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="charts-grid" id="chartsGrid">
+      <div class="chart-card skeleton-card" id="chartSkeleton1"><div class="skeleton-inner"></div></div>
+      <div class="chart-card skeleton-card" id="chartSkeleton2"><div class="skeleton-inner"></div></div>
+    </div>
+
+    <!-- Second charts row -->
+    <div class="charts-grid charts-grid-3" id="chartsGrid2"></div>
+
+    <!-- Download row -->
+    <div class="download-bar" id="dashDownloadBar" style="display:none">
+      <span><i data-feather="download-cloud"></i> Download current version:</span>
+      <button class="btn btn-outline-green" id="dashDlExcel">
+        <i data-feather="file"></i> Excel (.xlsx)
+      </button>
+      <button class="btn btn-outline-blue" id="dashDlCsv">
+        <i data-feather="file-text"></i> CSV (.csv)
+      </button>
+    </div>
+  </section>
+
+  <!-- ─── PAGE: EXCEL DATA ─── -->
+  <section class="page" id="page-data">
+    <div class="data-toolbar">
+      <div class="data-toolbar-left">
+        <div class="search-box">
+          <i data-feather="search"></i>
+          <input type="text" id="tableSearch" placeholder="Search all columns…" />
+        </div>
+        <select id="filterColSelect" class="filter-select">
+          <option value="">Filter column…</option>
+        </select>
+        <input type="text" id="filterValInput" class="filter-input" placeholder="Filter value…" />
+        <button class="btn btn-sm btn-primary" onclick="App.applyTableFilter()">Apply</button>
+        <button class="btn btn-sm btn-ghost" onclick="App.clearTableFilter()">Clear</button>
+      </div>
+      <div class="data-toolbar-right">
+        <span class="table-stats" id="tableStats">—</span>
+        <button class="btn btn-sm btn-outline-green" id="dataDlExcel">
+          <i data-feather="download"></i> Excel
+        </button>
+        <button class="btn btn-sm btn-outline-blue" id="dataDlCsv">
+          <i data-feather="download"></i> CSV
+        </button>
+      </div>
+    </div>
+
+    <!-- Quality summary bar -->
+    <div class="quality-bar" id="qualityBar" style="display:none">
+      <div class="quality-items" id="qualityItems"></div>
+    </div>
+
+    <div class="table-wrap" id="tableWrap">
+      <div class="table-empty" id="tableEmpty">
+        <i data-feather="upload"></i>
+        <p>Upload an Excel file to view data here.</p>
+      </div>
+      <table class="data-table" id="dataTable" style="display:none">
+        <thead id="dataTableHead"></thead>
+        <tbody id="dataTableBody"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </section>
+
+  <!-- ─── PAGE: AI AGENT ─── -->
+  <section class="page" id="page-agent">
+    <div class="agent-layout">
+      <!-- Chat panel -->
+      <div class="agent-chat-panel">
+        <div class="agent-header">
+          <div class="agent-avatar"><i data-feather="cpu"></i></div>
+          <div>
+            <h3>AI Data Agent</h3>
+            <p class="agent-subtitle">Powered by Groq — Brain + Tools</p>
+          </div>
+          <div class="agent-status-dot" id="agentStatusDot"></div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-message system">
+            <div class="message-avatar sys"><i data-feather="cpu"></i></div>
+            <div class="message-bubble">
+              <p>Hello! I'm your AI Data Agent. I can actually operate on your dataset — not just explain how to do it.</p>
+              <p>Try commands like:</p>
+              <div class="example-commands" id="exampleCommands">
+                <button class="example-cmd" onclick="App.setAgentCommand('Remove duplicate rows')">Remove duplicate rows</button>
+                <button class="example-cmd" onclick="App.setAgentCommand('Show top 10 products by sales')">Top 10 products by sales</button>
+                <button class="example-cmd" onclick="App.setAgentCommand('Find missing values')">Find missing values</button>
+                <button class="example-cmd" onclick="App.setAgentCommand('Sort by sales from highest to lowest')">Sort by sales (high → low)</button>
+                <button class="example-cmd" onclick="App.setAgentCommand('Calculate total sales')">Calculate total sales</button>
+                <button class="example-cmd" onclick="App.setAgentCommand('Give me insights')">Give me insights</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-input-area">
+          <textarea
+            id="agentInput"
+            class="chat-input"
+            rows="2"
+            placeholder="Type a command… e.g. 'Remove duplicate customers' or 'Filter Hyderabad orders'"
+          ></textarea>
+          <button class="btn btn-primary btn-send" id="agentSendBtn" onclick="App.sendAgentCommand()">
+            <i data-feather="send"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Info panel -->
+      <div class="agent-info-panel">
+        <div class="agent-info-card">
+          <h4><i data-feather="layers"></i> Architecture</h4>
+          <div class="arch-list">
+            <div class="arch-item"><span class="arch-icon brain">🧠</span><div><strong>Brain</strong><span>Groq AI (intent + planning)</span></div></div>
+            <div class="arch-item"><span class="arch-icon hands">🖐️</span><div><strong>Hands</strong><span>15 validated tools</span></div></div>
+            <div class="arch-item"><span class="arch-icon data">📊</span><div><strong>Data</strong><span>Your current dataset</span></div></div>
+            <div class="arch-item"><span class="arch-icon mem">💾</span><div><strong>Memory</strong><span>Supabase persistent storage</span></div></div>
+          </div>
+        </div>
+
+        <div class="agent-info-card">
+          <h4><i data-feather="tool"></i> Available Tools</h4>
+          <div class="tools-list" id="toolsList"></div>
+        </div>
+
+        <div class="agent-info-card" id="lastActionCard" style="display:none">
+          <h4><i data-feather="check-circle"></i> Last Action</h4>
+          <div id="lastActionDetail"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PAGE: AI INSIGHTS ─── -->
+  <section class="page" id="page-insights">
+    <div class="insights-layout">
+      <div class="insights-main">
+        <div class="insights-header-bar">
+          <h2>AI Insights</h2>
+          <button class="btn btn-sm btn-primary" onclick="App.refreshInsights()">
+            <i data-feather="refresh-cw"></i> Refresh
+          </button>
+        </div>
+
+        <div class="insights-card" id="insightsCard">
+          <div class="insights-loading" id="insightsLoading">
+            <div class="progress-spinner"></div>
+            <p>Generating AI insights…</p>
+          </div>
+          <div class="insights-content" id="insightsContent" style="display:none">
+            <div class="insights-ai-badge">
+              <span>🧠</span> Generated by Groq AI — based on verified statistics
+            </div>
+            <div id="insightsText" class="insights-text"></div>
+          </div>
+        </div>
+
+        <!-- Stats cards -->
+        <div class="stats-grid" id="statsGrid"></div>
+      </div>
+
+      <div class="insights-sidebar">
+        <div class="insights-sidebar-card">
+          <h4>Numeric Columns</h4>
+          <div id="numericStatsPanel"></div>
+        </div>
+        <div class="insights-sidebar-card">
+          <h4>Categorical Columns</h4>
+          <div id="categoricalStatsPanel"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PAGE: REPORTS ─── -->
+  <section class="page" id="page-reports">
+    <div class="reports-header">
+      <div>
+        <h2>Dataset Report</h2>
+        <p id="reportSubtitle" class="text-muted">—</p>
+      </div>
+      <button class="btn btn-primary" onclick="App.loadReport()">
+        <i data-feather="refresh-cw"></i> Refresh Report
+      </button>
+    </div>
+
+    <div class="report-grid" id="reportGrid">
+      <div class="report-loading" id="reportLoading">
+        <div class="progress-spinner"></div><p>Generating report…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PAGE: HISTORY ─── -->
+  <section class="page" id="page-history">
+    <div class="history-header">
+      <h2>Version History</h2>
+      <p class="text-muted">Every version is preserved. Original data is never overwritten.</p>
+    </div>
+
+    <div class="history-empty" id="historyEmpty">
+      <i data-feather="clock"></i>
+      <p>No history yet. Upload a file to get started.</p>
+    </div>
+
+    <div class="history-timeline" id="historyTimeline"></div>
+  </section>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════ MODALS -->
+
+<!-- Upload result modal -->
+<div class="modal-overlay" id="uploadResultModal" style="display:none">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 id="uploadModalTitle">Upload Complete</h3>
+      <button class="modal-close" onclick="App.closeModal('uploadResultModal')"><i data-feather="x"></i></button>
+    </div>
+    <div class="modal-body" id="uploadModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="App.goToDashboard()">
+        <i data-feather="layout"></i> Open Dashboard
+      </button>
+      <button class="btn btn-ghost" onclick="App.closeModal('uploadResultModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Global loading overlay -->
+<div class="loading-overlay" id="loadingOverlay" style="display:none">
+  <div class="loading-box">
+    <div class="progress-spinner lg"></div>
+    <p id="loadingText">Processing…</p>
+  </div>
+</div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>

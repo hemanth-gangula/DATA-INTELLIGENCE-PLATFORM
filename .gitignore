@@ -1,0 +1,56 @@
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# Temporary uploads
+tmp/
+*.xlsx
+*.xls
+*.csv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel/
+
+# Logs
+*.log
+
+# Debug / probe scripts created during development
+check_conn.py
+check_constraint.py
+create_test_excel.py
+find_constraints.py
+groq_model_test.py
+schema_probe.py
+schema_probe2.py
+upload_probe.py
+last_dataset_id.txt

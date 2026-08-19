@@ -1,0 +1,25 @@
+# AI-Powered Excel Data Intelligence Platform
+# Python dependencies — tested on Python 3.14
+
+# ── Web framework ──────────────────────────────────────────────────
+Flask>=3.1.0
+flask-cors>=6.0.0
+gunicorn>=22.0.0
+
+# ── Environment ────────────────────────────────────────────────────
+python-dotenv>=1.0.0
+
+# ── AI / LLM ───────────────────────────────────────────────────────
+groq>=1.0.0
+
+# ── Database / Storage ────────────────────────────────────────────
+supabase>=2.5.0
+
+# ── Excel / Data processing ───────────────────────────────────────
+pandas>=2.0.0
+openpyxl>=3.1.0
+xlrd>=2.0.0
+numpy>=1.26.0
+
+# ── Utilities ─────────────────────────────────────────────────────
+Werkzeug>=3.0.0
